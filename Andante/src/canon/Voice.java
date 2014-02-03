@@ -25,7 +25,7 @@ public class Voice {
 		this.measures = new ArrayList<Measure>();
 		this.measure_offset = measure_offset;
 		
-		setCurrentStep(StepManager.jump_faceUp);
+		setCurrentStep(CanonStepManager.jump_faceUp);
 	}
 	
 	public FrameProfile getThisKeyFrame() { return thisKeyFrame; }

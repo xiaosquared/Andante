@@ -1,7 +1,7 @@
 package canon;
 
 import anim.Step;
-import anim.StepManager;
+import anim.CanonStepManager;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -68,10 +68,10 @@ public class Player {
 
 		if  ((anim_frame % 8) == 0) {
 			//StepManager.setStepTest(v1);
-			StepManager.setStep(v1);
-			StepManager.setStep(v2);
-			StepManager.setStep(v3);
-			StepManager.setStep(v4);
+			CanonStepManager.setStep(v1);
+			CanonStepManager.setStep(v2);
+			CanonStepManager.setStep(v3);
+			CanonStepManager.setStep(v4);
 		}
 		drawStep(parent, anim_frame % 8 );
 		
@@ -96,19 +96,19 @@ public class Player {
 			
 		if (parent.one) {
 			parent.tint(255, 255, 255, 90);
-			v1.getCurrentStep().drawFrame(parent, v1.getAnimNote(), frame);
+			v1.getCurrentStep().drawFrame(parent, v1.getAnimNote(), frame, parent.img_y);
 		}
 		if (parent.two) {
 			parent.tint(255, 255, 125, 90);
-			v2.getCurrentStep().drawFrame(parent, v2.getAnimNote(), frame);
+			v2.getCurrentStep().drawFrame(parent, v2.getAnimNote(), frame, parent.img_y);
 		}
 		if (parent.three) {
 			parent.tint(125, 255, 255, 90);
-			v3.getCurrentStep().drawFrame(parent, v3.getAnimNote(), frame);
+			v3.getCurrentStep().drawFrame(parent, v3.getAnimNote(), frame, parent.img_y);
 		}
 		if (parent.four) {
 			parent.tint(255, 124, 255, 90);
-			v4.getCurrentStep().drawFrame(parent, v4.getAnimNote(), frame);
+			v4.getCurrentStep().drawFrame(parent, v4.getAnimNote(), frame, parent.img_y);
 		}
 	}
 	

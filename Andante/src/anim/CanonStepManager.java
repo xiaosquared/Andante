@@ -4,7 +4,7 @@ import canon.Voice;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-public class StepManager {
+public class CanonStepManager {
 	
 	public static Step jump_faceUp, jump_faceDown; 
 	public static Step whole_step_up, half_step_up, whole_step_down, half_step_down;
@@ -79,7 +79,6 @@ public class StepManager {
 			images[i].resize(0, 85);
 			//images[i].resize(0, 200);
 		}
-		
 		return images;
 	}
 

@@ -1,6 +1,7 @@
 package anim;
 
 import canon.Canon;
+import processing.core.PApplet;
 import processing.core.PImage;
 
 public class Step {
@@ -46,7 +47,7 @@ public class Step {
 	/**
 	 * @return true if we're at the end of sequence
 	 */
-	public void drawFrame(Canon parent, int last_note, int frame) {
+	public void drawFrame(PApplet parent, int last_note, int frame, int img_y) {
 		int img_x = getImgX(last_note);
 		
 		if (facingUp) {
@@ -55,7 +56,7 @@ public class Step {
 			img_x -= offset;
 		}
 		
-		double y = ((double)img_x/692)*20 + parent.img_y;
+		double y = ((double)img_x/692)*20 + img_y;
 		
 		
 		if (frame < sequence.length)	// for normal 8 frame sequences
@@ -77,6 +78,9 @@ public class Step {
 			case 2: // D
 				noteX = 140;
 				break;
+			case 3: // Eb
+				noteX = 148;
+				break;
 			case 4: // E
 				noteX = 156;
 				break;
@@ -89,9 +93,12 @@ public class Step {
 			case 9:	// A
 				noteX = 195;
 				break;
-			case 11: // B
-				noteX = 210;
+			case 10: // Bb
+				noteX = 203;
 				break;
+			case 11: // B
+				noteX = 211;
+				break;	
 			default:
 				noteX = 0;
 		}

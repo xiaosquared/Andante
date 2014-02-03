@@ -5,7 +5,7 @@ import java.awt.GraphicsEnvironment;
 import java.util.Iterator;
 import processing.opengl.PGraphicsOpenGL;
 
-import anim.StepManager;
+import anim.CanonStepManager;
 import processing.core.PApplet;
 import processing.core.PImage;
 import rwmidi.MidiInput;
@@ -29,7 +29,7 @@ public class Canon extends PApplet{
 	//** P L A Y B A C K ***//
 	Player canon_player;
 	boolean isPaused = true;
-	int target_frame_rate = 22;
+	int target_frame_rate = 15;
 	int last_millis = 0;
 	
 	boolean one = true;
@@ -47,11 +47,12 @@ public class Canon extends PApplet{
 		size(1024, 535 + y_offset, P3D);
 		//size(1024, 300);
 		//size(50, 50);
+		frameRate(15);
 		background(0);
 		noStroke();
 		fill(0, 0, 0, 50);
 		
-		StepManager.setup(this);
+		CanonStepManager.setup(this);
 		canon_player = new Player();
 		
 		if (USE_MIDI_INPUT)
@@ -69,20 +70,14 @@ public class Canon extends PApplet{
 	}
 	
 	public void draw() {
-//		if (init) 
-//			canon_player.initFigure(this);
-//		
-		int millis = millis();
-		if (!isPaused && (millis - last_millis > (1000/target_frame_rate))) {
-			last_millis = millis;
+		if (!isPaused)
 			canon_player.run(this);
-		}
 	}
 	
 	public void noteOnReceived(Note n) {
 		if (n.getPitch() == 48)
 			println("START!");
-		//println("note on " + n.getPitch() + ", " + n.getVelocity());
+		println("note on " + n.getPitch() + ", " + n.getVelocity());
 	}
 	
 	public void noteOffReceived(Note n) {
