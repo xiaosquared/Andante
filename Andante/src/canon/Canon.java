@@ -18,7 +18,7 @@ public class Canon extends PApplet{
 	private static final long serialVersionUID = 1L;
 	
 	int y_offset = 215;		// adjustment for projection onto keys
-	public int img_y = 380; 
+	public int img_y = 385; 
 	
 	//*** M I D I ***//
 	private boolean USE_MIDI_INPUT = true;
@@ -29,7 +29,7 @@ public class Canon extends PApplet{
 	//** P L A Y B A C K ***//
 	Player canon_player;
 	boolean isPaused = true;
-	int target_frame_rate = 15;
+	int target_frame_rate = 20;
 	int last_millis = 0;
 	
 	boolean one = true;
@@ -47,7 +47,7 @@ public class Canon extends PApplet{
 		size(1024, 535 + y_offset, P3D);
 		//size(1024, 300);
 		//size(50, 50);
-		frameRate(15);
+		frameRate(target_frame_rate);
 		background(0);
 		noStroke();
 		fill(0, 0, 0, 50);

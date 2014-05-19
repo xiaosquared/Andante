@@ -75,6 +75,9 @@ public class Step {
 			case 0:	// C
 				noteX = 125;
 				break;
+			case 1:	// C#
+				noteX = 132;
+				break;
 			case 2: // D
 				noteX = 140;
 				break;
@@ -87,8 +90,14 @@ public class Step {
 			case 5:	// F
 				noteX = 164;
 				break;
+			case 6:	// F#
+				noteX = 172;
+				break;
 			case 7:	// G
 				noteX = 180;
+				break;
+			case 8:	// G
+				noteX = 188;
 				break;
 			case 9:	// A
 				noteX = 195;

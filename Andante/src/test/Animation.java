@@ -78,7 +78,8 @@ public class Animation {
 	
 			// if we're on F#, special case
 			if (n.type == NoteType.F_SHARP) {
-				if ((n.octave == 7) || (Math.random() < .5))
+				//if ((n.octave == 7) || (Math.random() < .5))
+				if (n.octave == 7)
 					currentStep = turn_left1;
 				else
 					currentStep = three_step_right;
@@ -96,7 +97,8 @@ public class Animation {
 		
 			// if we're on A# special case
 			if (n.type == NoteType.A_SHARP) {
-				if ((n.octave <= 2) || (Math.random() < .5)) 
+				//if ((n.octave <= 2) || (Math.random() < .5)) 
+				if (n.octave <= 2)
 					currentStep = turn_right1;
 				else 
 					currentStep = three_step_left;
