@@ -49,6 +49,7 @@ public class Step {
 	 */
 	public void drawFrame(PApplet parent, int last_note, int frame, int img_y) {
 		int img_x = getImgX(last_note);
+		//parent.println(img_x);
 		
 		if (facingUp) {
 			img_x = img_x + 8 - sequence[0].width + offset;

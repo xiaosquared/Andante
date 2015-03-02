@@ -3,8 +3,9 @@ package canon;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.util.Iterator;
-import processing.opengl.PGraphicsOpenGL;
 
+import controlP5.*;
+import processing.opengl.PGraphicsOpenGL;
 import anim.CanonStepManager;
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -21,8 +22,8 @@ public class Canon extends PApplet{
 	public int img_y = 385; 
 	
 	//*** M I D I ***//
-	private boolean USE_MIDI_INPUT = true;
-	private boolean USE_MIDI_OUTPUT = true;
+	protected boolean USE_MIDI_INPUT = true;
+	protected boolean USE_MIDI_OUTPUT = true;
 	public MidiInput input;
 	public MidiOutput output;
 	
@@ -37,11 +38,18 @@ public class Canon extends PApplet{
 	boolean three = false;
 	boolean four = false;
 	
+	int canonMode = 3;	// when two voices are on
+	
 	boolean trails = true;
 	
 	//** Standing figure ***//
 	PImage standing_still;
 	boolean init;
+
+	//*** C O N T R O L L E R ***//
+	ControlP5 cp5;
+	ControlWindow teacherGUI;
+	RadioButton voicesButton, measureButton, lengthButton, rhythmButton;
 	
 	public void setup() {
 		size(1024, 535 + y_offset, P3D);
@@ -66,7 +74,57 @@ public class Canon extends PApplet{
 		//image(standing_still, 125, 50);
 		//canon_player.initFigure(this);
 		
+		cp5 = new ControlP5(this);
+		teacherGUI = cp5.addControlWindow("TeacherGUI", 0, 0, 800, 600).setBackground(20);
+		voicesButton = cp5.addRadioButton("voicesButton").moveTo(teacherGUI)
+				.setPosition(200, 160)
+				.setSize(40,20)
+				.setColorForeground(color(120))
+				.setColorActive(color(255))
+				.setColorLabel(color(255))
+				.setItemsPerRow(3)
+				.setSpacingColumn(80)
+				.addItem("low voice", 1)
+				.addItem("high voice", 2)
+				.addItem("both voices", 3);
 		
+		measureButton = cp5.addRadioButton("measureButton").moveTo(teacherGUI)
+				.setPosition(200, 260)
+				.setSize(40,20)
+				.setColorForeground(color(120))
+				.setColorActive(color(255))
+				.setColorLabel(color(255))
+				.setItemsPerRow(5)
+				.setSpacingColumn(80)
+				.addItem("m1", 0)
+				.addItem("m2", 1)
+				.addItem("m3", 2)
+				.addItem("m4", 3)
+				.addItem("m5", 4);
+		
+		lengthButton = cp5.addRadioButton("lengthButton").moveTo(teacherGUI)
+				.setPosition(200, 360)
+				.setSize(40,20)
+				.setColorForeground(color(120))
+				.setColorActive(color(255))
+				.setColorLabel(color(255))
+				.setItemsPerRow(3)
+				.setSpacingColumn(80)
+				.addItem("1", 1)
+				.addItem("2", 2)
+				.addItem("4", 4);
+		
+		rhythmButton = cp5.addRadioButton("rhythmButton").moveTo(teacherGUI)
+				.setPosition(200, 460)
+				.setSize(40,20)
+				.setColorForeground(color(120))
+				.setColorActive(color(255))
+				.setColorLabel(color(255))
+				.setItemsPerRow(3)
+				.setSpacingColumn(80)
+				.addItem("rhythm", 0)
+				.addItem("melody", 1);
+						
 	}
 	
 	public void draw() {
@@ -95,12 +153,13 @@ public class Canon extends PApplet{
 		else if (key == '4')
 			four = !four;
 		else if (key == 't')
-			trails = !trails;
+			trails = !trails; 
 		else if (keyCode == 32)
 			isPaused = !isPaused;
 			
 		if (isPaused) {
 			canon_player.pause(this);
+			canon_player.resetMeasures(this);
 		}
 	}
 	
@@ -109,6 +168,56 @@ public class Canon extends PApplet{
 		
 		background(0);
 	}
+	
+	  public void controlEvent(ControlEvent e) {
+		  println(e.getGroup().getName());
+		  println(e.getGroup().getValue());
+		  
+		  int value = (int) e.getGroup().getValue();
+		  
+		  if (e.isFrom(voicesButton)) {						// set which voice is on
+			switch(value) {
+				case 1:
+					one = true;
+					two = false;
+					canonMode = 1;
+					println("one");
+					break;
+				case 2:
+					one = false;
+					two = true;
+					canonMode = 2;
+					println("two");
+					break;
+				case 3:
+					one = true;
+					two = true;
+					canonMode = 3;
+					println("three");
+					break;
+			}
+		  }
+		  
+		  else if (e.isFrom(measureButton)) {
+			  if (value == -1)
+				  return;
+			  //background(0);			  
+			  canon_player.goToMeasure(this, value);
+		  }
+		  
+		  else if (e.isFrom(lengthButton)) {
+			  canon_player.setSegmentLength(this, value);
+		  }
+		  
+		  else if (e.isFrom(rhythmButton)) {
+			  if (value == 0)
+				  canon_player.bRhythmOnly = true;
+			  else
+				  canon_player.bRhythmOnly = false;
+		  }
+		  
+		  canon_player.goToMeasure(this, canon_player.segment_measure_start);
+	  }
 	
 	public static void main(String[] args) {
 		/* 

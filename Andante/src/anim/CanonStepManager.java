@@ -86,6 +86,11 @@ public class CanonStepManager {
 		v.setCurrentStep(dbt_hsws);
 	}
 	
+	//TODO: Going to a new measure. Set what step it starts with. Maybe need to make it face another way 
+	public static void goToMeasureStep(Voice v, int m) {
+		v.setCurrentStep(no_step_up);
+	}
+	
 	public static void setStep(Voice v) {
 	
 		int n2 = v.getThisKeyFrame().getN2();

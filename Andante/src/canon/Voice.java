@@ -6,17 +6,20 @@ import anim.*;
 
 
 public class Voice {
-	ArrayList<Measure> measures;
+	protected ArrayList<Measure> measures;
 	
-	int local_measure = 0;			// which measure we are on within this voice
-	int measure_offset;			// how many measures in the beginning before we start
+	protected int local_measure = 0;			// which measure we are on within this voice
+	protected int measure_offset;			// how many measures in the beginning before we start
 	
-	FrameProfile thisKeyFrame;
-	FrameProfile lastKeyFrame;
+	protected FrameProfile thisKeyFrame;
+	protected FrameProfile lastKeyFrame;
 	
 	//* Animation
-	Step current_step;
-	int anim_note;
+	protected Step current_step;
+	protected int anim_note;
+	
+	// rhythm note
+	protected int rhythm_note;
 	
 	public Voice(int measure_offset, int start_note) {
 		lastKeyFrame = new FrameProfile(start_note, start_note, start_note, 0, 0, 1);
@@ -25,7 +28,7 @@ public class Voice {
 		this.measures = new ArrayList<Measure>();
 		this.measure_offset = measure_offset;
 		
-		setCurrentStep(CanonStepManager.jump_faceUp);
+		setCurrentStep(CanonStepManager.jump_faceUp); 
 	}
 	
 	public FrameProfile getThisKeyFrame() { return thisKeyFrame; }
@@ -56,9 +59,29 @@ public class Voice {
 	
 	public int getMeasureOffset() { return measure_offset; }
 	
+	public void setLocalMeasure(int m) { local_measure = m; }
+	
+	public int getLocalMeasure() { return local_measure; }
+	
+	public void resetMeasure(int m) {
+		measures.get(m).resetMeasure();
+	}
+	
 	public Step getCurrentStep() { return current_step; }
 	public void setCurrentStep(Step s) { current_step = s; }
-		
+	
+	// returns the first note of that measure
+	public int getFirstNoteOfMeasure(int m) {
+		if (measures.get(m).getFirstBeat() == 1)
+			return measures.get(m).getFirstNote();
+		else return measures.get(m-1).getLastNote();
+	}
+	
+	// note that is played if we're in rhythm-only mode
+	public int getRhythmNote() {
+		return getFirstNoteOfMeasure(0);
+	}
+	
 	public Measure getMeasure(int global_measure) {
 		int local_measure = global_measure - measure_offset;
 		if (local_measure >= 0) 
@@ -77,5 +100,9 @@ public class Voice {
 		if (local_measure >= measures.size())
 			return true;
 		return false;
+	}
+	
+	public ArrayList<Measure> getMeasures() {
+		return measures;
 	}
 }

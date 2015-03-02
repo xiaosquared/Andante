@@ -49,7 +49,26 @@ public class Measure {
 		return velocity[currentBeat];
 	}
 	
+	public int getId() {
+		return id;
+	}
+	
 	public void incrementBeat() {
 		currentBeat++;
+	}
+	
+	/**
+	 * @return first note of the measure. 
+	 */
+	public int getFirstNote() {
+		return notes[0];
+	}
+	
+	public int getLastNote() {
+		return notes[notes.length-1];
+	}
+	
+	public float getFirstBeat() {
+		return beats[0];
 	}
 }
