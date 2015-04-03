@@ -5,6 +5,8 @@ import java.awt.GraphicsEnvironment;
 import java.util.Iterator;
 
 import controlP5.*;
+import ddf.minim.AudioPlayer;
+import ddf.minim.Minim;
 import processing.opengl.PGraphicsOpenGL;
 import anim.CanonStepManager;
 import processing.core.PApplet;
@@ -51,6 +53,13 @@ public class Canon extends PApplet{
 	ControlWindow teacherGUI;
 	RadioButton voicesButton, measureButton, lengthButton, rhythmButton;
 	
+	//sound
+	Minim minim;
+	AudioPlayer audioPlayer;
+	
+	//score
+	ScoreManager score;
+	
 	public void setup() {
 		size(1024, 535 + y_offset, P3D);
 		//size(1024, 300);
@@ -60,8 +69,12 @@ public class Canon extends PApplet{
 		noStroke();
 		fill(0, 0, 0, 50);
 		
+		//sound
+		minim = new Minim((PApplet) this);
+		audioPlayer = minim.loadFile("data/sounds/punch.mp3");
+		
 		CanonStepManager.setup(this);
-		canon_player = new Player();
+		canon_player = new Player(audioPlayer);
 		
 		if (USE_MIDI_INPUT)
 			input = RWMidi.getInputDevices()[0].createInput(this);
@@ -74,6 +87,13 @@ public class Canon extends PApplet{
 		//image(standing_still, 125, 50);
 		//canon_player.initFigure(this);
 		
+		setupGUI(); // makes the controller interface
+		
+		score = new ScoreManager(this);
+		score.draw();				
+	}
+	
+	private void setupGUI() {
 		cp5 = new ControlP5(this);
 		teacherGUI = cp5.addControlWindow("TeacherGUI", 0, 0, 800, 600).setBackground(20);
 		voicesButton = cp5.addRadioButton("voicesButton").moveTo(teacherGUI)
@@ -108,11 +128,12 @@ public class Canon extends PApplet{
 				.setColorForeground(color(120))
 				.setColorActive(color(255))
 				.setColorLabel(color(255))
-				.setItemsPerRow(3)
+				.setItemsPerRow(4)
 				.setSpacingColumn(80)
-				.addItem("1", 1)
 				.addItem("2", 2)
-				.addItem("4", 4);
+				.addItem("3", 3)
+				.addItem("4", 4)
+				.addItem("6", 6);
 		
 		rhythmButton = cp5.addRadioButton("rhythmButton").moveTo(teacherGUI)
 				.setPosition(200, 460)
@@ -124,7 +145,6 @@ public class Canon extends PApplet{
 				.setSpacingColumn(80)
 				.addItem("rhythm", 0)
 				.addItem("melody", 1);
-						
 	}
 	
 	public void draw() {
@@ -144,6 +164,7 @@ public class Canon extends PApplet{
 	}
 	
 	public void keyPressed() {
+		System.out.println("key pressed: " + key);
 		if (key == '1')
 			one = !one;
 		else if (key == '2')
@@ -153,10 +174,25 @@ public class Canon extends PApplet{
 		else if (key == '4')
 			four = !four;
 		else if (key == 't')
-			trails = !trails; 
-		else if (keyCode == 32)
+			trails = !trails;
+		else if (key == 'f') {
+			target_frame_rate = 20;
+			frameRate(20);
+		}
+		else if (key == 's') {
+			target_frame_rate = 12;
+			frameRate(12f);
+		}
+		else if (keyCode == 32) {
 			isPaused = !isPaused;
-			
+			canon_player.goToMeasure(this, canon_player.segment_measure_start);
+			background(0);
+			score.draw();
+		}
+		else if (key == 'm') 
+			canon_player.bPlayMetronome = !canon_player.bPlayMetronome;
+		else if (key == 'r')
+			canon_player.bRhythmOnly = !canon_player.bRhythmOnly;
 		if (isPaused) {
 			canon_player.pause(this);
 			canon_player.resetMeasures(this);
@@ -165,7 +201,7 @@ public class Canon extends PApplet{
 	
 	public void mousePressed() {
 		System.out.println(mouseX + ", " + mouseY);
-		
+	
 		background(0);
 	}
 	
@@ -217,6 +253,7 @@ public class Canon extends PApplet{
 		  }
 		  
 		  canon_player.goToMeasure(this, canon_player.segment_measure_start);
+		  score.draw();
 	  }
 	
 	public static void main(String[] args) {

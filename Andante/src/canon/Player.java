@@ -1,5 +1,6 @@
 package canon;
 
+import ddf.minim.AudioPlayer;
 import anim.Step;
 import anim.CanonStepManager;
 import processing.core.PApplet;
@@ -31,9 +32,11 @@ public class Player {
 	int init_frame_counter = 0;
 	
 	// rhythm only or melody
-	boolean bRhythmOnly = false;
-
-	public Player() {
+	public boolean bRhythmOnly = false;
+	public boolean bPlayMetronome = false;
+	AudioPlayer audioPlayer;
+	
+	public Player(AudioPlayer a) {
 		v1 = new Voice(0, 48);
 		v2 = new Voice(1, 55);
 		v3 = new Voice(2, 62);
@@ -45,6 +48,8 @@ public class Player {
 		XMLManager.readXML("data/voice4.xml", v4.measures, 0);
 		
 		total_measures = v1.measures.size();
+		
+		audioPlayer = a;
 	}
 	
 
@@ -121,6 +126,12 @@ public class Player {
 			v2_note1 = v2.getFirstNoteOfMeasure(measure);
 		v2.setThisKeyFrame(v2_note1, v2_note1, v2_note1, 0, 0, 1);
 		v2.setLastkeyFrame(v2_note1, v2_note1, v2_note1, 0, 0, 1);
+
+		if (parent.canonMode == 3)
+			parent.score.setMeasures(measure, true, true, segment_measure_length);
+		else
+			parent.score.setMeasures(measure, parent.one, parent.two, segment_measure_length);
+
 	}
 	
 	//TODO
@@ -128,7 +139,11 @@ public class Player {
 		// reset measures
 		v1.resetMeasure(global_measure);
 		v2.resetMeasure(global_measure - 1);
-		 
+		
+		// reset notes
+		noteOff(v1, parent);
+		noteOff(v2, parent);
+		
 		if (parent.canonMode == 2)
 			goToMeasure(parent, global_measure - segment_measure_length - 1);
 		else
@@ -155,8 +170,9 @@ public class Player {
 		float my_beat = getMyBeat(my_frame);
 		
 		// Figure out what frame of measure we're on for animation
-		int anim_frame = getAnimFrame(my_frame, parent.target_frame_rate);
+		int anim_frame = getAnimFrame(my_frame, parent.target_frame_rate, parent);
 		//parent.println("segment counter: " + segment_counter + " anim_frame: " + anim_frame);
+		float my_beat_rhythm = getMyBeat(anim_frame);
 		
 		//*** DEAL WITH ANIMATION ***//
 		if  ((anim_frame % 8) == 0) {
@@ -172,8 +188,10 @@ public class Player {
 		if (parent.canonMode == 3) {
 			if (frame_counter == frames_per_measure)
 				parent.two = true;
-			else if (frame_counter == frames_in_segment - frames_per_measure) 
+			else if (frame_counter == frames_in_segment - frames_per_measure) { 
 				parent.one = false;
+				noteOff(v1, parent);
+			}
 		}
 		if (frame_counter == frames_in_segment) {  
 			endOfSegment(parent);
@@ -181,18 +199,29 @@ public class Player {
 		}
 		updateFrame();
 		
+		//*** DEAL WITH RHYTHM AUDIO ***//
+		if (bPlayMetronome) {
+			if ((my_beat_rhythm != -1) && (my_beat_rhythm % 1 == 0)) {
+				audioPlayer.rewind();
+				audioPlayer.play();
+			}
+		}
+
 		//*** DEAL WITH MIDI***// 
 		// if we're not on a beat that sends midi signals things, return
-		if (my_beat == -1) {
+		if (my_beat == -1) {  
 			return;
 		}
 		playMidiVoices(parent, my_beat);
+		
 	}
 	
 	private void drawStep(Canon parent, int frame) {
 		
-		if (parent.trails) 
+		if (parent.trails) { 
+			parent.fill(0);
 			parent.rect(134, 363, 500, 120);
+		}
 		else
 			parent.background(0);
 			
@@ -202,7 +231,7 @@ public class Player {
 			y-=30;
 		
 		if (parent.one) {
-			parent.tint(255, 255, 255, 90);
+			parent.tint(125, 255, 255, 90);
 			v1.getCurrentStep().drawFrame(parent, v1.getAnimNote(), frame, y);
 		}
 		if (parent.two) {
@@ -210,7 +239,7 @@ public class Player {
 			v2.getCurrentStep().drawFrame(parent, v2.getAnimNote(), frame, y);
 		}
 		if (parent.three) {
-			parent.tint(125, 255, 255, 90);
+			parent.tint(255, 255, 255, 90);
 			v3.getCurrentStep().drawFrame(parent, v3.getAnimNote(), frame, y);
 		}
 		if (parent.four) {
@@ -230,16 +259,18 @@ public class Player {
 
 	}
 	
-	public int getAnimFrame(int frame, int fps) {
-		int offset = getAnimOffset(fps);
+	public int getAnimFrame(int frame, int fps, Canon parent) {
+		int offset = getAnimOffset(fps, parent);
 		if (frame >= offset)
 			return frame - offset;
 		return frame + frames_per_measure - offset;
 	}
 
-	private int getAnimOffset(int fps) {
-		//return 0;
-		return fps/4-2;
+	private int getAnimOffset(int fps, Canon parent) {
+		if (parent.target_frame_rate == 20)
+			return fps/4-2;
+		else 
+			return 1;
 	}
 	
 	private void updateFrame() {
@@ -256,6 +287,10 @@ public class Player {
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
+		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
+		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
+		parent.output.sendNoteOff(0, v.getN2(), 30);
+		parent.output.sendNoteOff(0, v.getN2(), 30);
 		parent.output.sendNoteOff(0, v.getN2(), 30);
 		parent.output.sendNoteOff(0, v.getN2(), 30);
 		parent.output.sendNoteOff(0, v.getN2(), 30);
@@ -275,6 +310,7 @@ public class Player {
 		}
 
 	}
+	
 	
 	/**
 	 * @param current_beat_m Ð the beat of the measure that the next note arrives on
@@ -303,6 +339,8 @@ public class Player {
 					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
 					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
 					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
+					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
+					
 				}
 				else { 
 					parent.output.sendNoteOn(0, current_note, current_note_velocity);
@@ -310,6 +348,8 @@ public class Player {
 					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
 					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
 					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
+					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
+					
 				}
 			}
 			
@@ -324,6 +364,8 @@ public class Player {
 				m.resetMeasure();
 		}
 	}
+	
+	
 	
 	private void getNextNoteAndBeat(Measure m, Voice v, float[] container) {
 		float beat = m.getNextBeat();
