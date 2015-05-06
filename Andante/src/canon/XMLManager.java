@@ -13,6 +13,8 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import processing.core.PVector;
+
 public class XMLManager {
 
 	// populates ArrayList<Measure>
@@ -43,6 +45,7 @@ public class XMLManager {
 					 noteArray[k] = Utils.getMidiNumber(n.getAttributeValue("type")) + note_offset;
 					 beatArray[k] = Float.parseFloat(n.getAttributeValue("beat"));
 					 velocityArray[k] = Integer.parseInt(n.getAttributeValue("vel"));
+					 
 				 }
 				 
 				 // create new Measure from populated arrays and put it in measures array

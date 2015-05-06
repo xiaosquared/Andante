@@ -1,11 +1,18 @@
 package canon;
 
+import processing.core.PVector;
+
 public class Measure {
 	int id;
 	
 	int[] notes;	// notes in the measure
+	int[] notes_on; // valus < 0 -> not played yet; value = 0 -> playing; value > 0 -> played
 	float[] beats;  // on which beats do they occur
 	int[] velocity;
+	
+	// for blocks
+	PVector[] block_xys;
+	int[] block_lengths;
 	
 	int currentBeat = 0;
 	
@@ -14,6 +21,16 @@ public class Measure {
 		this.notes = notes;
 		this.beats = beats;
 		this.velocity = velocity;
+		
+		notes_on = new int[notes.length];
+		for (int i = 0; i < notes.length; i++) {
+			notes_on[i] = -1;
+		}
+	}
+	
+	public void initBlockArrays(PVector[] block_xys, int[] block_lengths) {
+		this.block_xys = block_xys;
+		this.block_lengths = block_lengths;
 	}
 	
 	public void resetMeasure() {

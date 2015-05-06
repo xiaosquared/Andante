@@ -2,11 +2,13 @@ package canon;
 
 import java.util.ArrayList;
 
+import processing.core.PVector;
 import anim.*;
 
 
 public class Voice {
 	protected ArrayList<Measure> measures;
+	int beats_per_measure = 4;
 	
 	protected int local_measure = 0;			// which measure we are on within this voice
 	protected int measure_offset;			// how many measures in the beginning before we start
@@ -29,6 +31,47 @@ public class Voice {
 		this.measure_offset = measure_offset;
 		
 		setCurrentStep(CanonStepManager.jump_faceUp); 
+	}
+	
+	public void initBlocks(int pixels_per_beat, int startY, float note_width, float x_offset, int epsilon) {
+		for (int i = 0; i < measures.size(); i++) {
+			float measure_offset =  beats_per_measure * pixels_per_beat * i;
+			Measure m = measures.get(i);
+			Measure m_next;
+			if (i < measures.size() - 1)
+				m_next = measures.get(i+1);
+			else m_next = measures.get(0);
+			
+			// initialize arrays for blocks in each measure
+			m.initBlockArrays(new PVector[m.notes.length], new int[m.notes.length]);
+			
+			for (int k = 0; k < m.beats.length; k ++) {		 
+				float offset = m.beats[k] * pixels_per_beat;
+				int y = (int) (startY - offset);
+				int x = (int) ((m.notes[k]-21) * note_width + x_offset);
+				
+				int length = pixels_per_beat - epsilon;		// by default, length is 1 beat
+				
+				if ((m.beats[k] % 1 != 0) ||				// check to see if it's 8th notes
+				   ((k < m.beats.length - 1) && m.beats[k+1] % 1 != 0))
+					length = length/2; 
+				
+				else if ((k < m.beats.length - 1) && (m.beats[k+1] - m.beats[k] > 1))
+					length = (int) (pixels_per_beat * (m.beats[k+1] - m.beats[k]) - epsilon);
+				
+				else if (m_next.beats[0] > 1) {				// TODO: there's a bug here...check for syncopation 
+					if ((m.beats[k] == 1) && (m.beats.length == 1))
+						length = pixels_per_beat * 5 - epsilon;
+					else if (m.beats[k] == 3)
+						length = pixels_per_beat * 3 - epsilon;
+				}
+				y -= length;								// since y specifies the top of the rect
+				
+				m.block_xys[k] = new PVector((int)x, (int)y);
+				m.block_lengths[k] = length;
+			}
+		}
+			
 	}
 	
 	public FrameProfile getThisKeyFrame() { return thisKeyFrame; }

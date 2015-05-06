@@ -5,8 +5,6 @@ import java.awt.GraphicsEnvironment;
 import java.util.Iterator;
 
 import controlP5.*;
-import ddf.minim.AudioPlayer;
-import ddf.minim.Minim;
 import processing.opengl.PGraphicsOpenGL;
 import anim.CanonStepManager;
 import processing.core.PApplet;
@@ -30,9 +28,10 @@ public class Canon extends PApplet{
 	public MidiOutput output;
 	
 	//** P L A Y B A C K ***//
-	Player canon_player;
+	// ANDANTE
+	CanonPlayer canon_player;
 	boolean isPaused = true;
-	int target_frame_rate = 20;
+	int target_frame_rate = 15;
 	int last_millis = 0;
 	
 	boolean one = true;
@@ -43,6 +42,10 @@ public class Canon extends PApplet{
 	int canonMode = 3;	// when two voices are on
 	
 	boolean trails = true;
+
+	// BLOCK MODE
+	BlockPlayer block_player;
+	boolean figuresNotBlocks = true;
 	
 	//** Standing figure ***//
 	PImage standing_still;
@@ -51,11 +54,7 @@ public class Canon extends PApplet{
 	//*** C O N T R O L L E R ***//
 	ControlP5 cp5;
 	ControlWindow teacherGUI;
-	RadioButton voicesButton, measureButton, lengthButton, rhythmButton;
-	
-	//sound
-	Minim minim;
-	AudioPlayer audioPlayer;
+	RadioButton voicesButton, measureButton, lengthButton, modeButton;
 	
 	//score
 	ScoreManager score;
@@ -69,12 +68,10 @@ public class Canon extends PApplet{
 		noStroke();
 		fill(0, 0, 0, 50);
 		
-		//sound
-		minim = new Minim((PApplet) this);
-		audioPlayer = minim.loadFile("data/sounds/punch.mp3");
-		
 		CanonStepManager.setup(this);
-		canon_player = new Player(audioPlayer);
+		canon_player = new CanonPlayer();
+		
+		block_player = new BlockPlayer();
 		
 		if (USE_MIDI_INPUT)
 			input = RWMidi.getInputDevices()[0].createInput(this);
@@ -133,9 +130,9 @@ public class Canon extends PApplet{
 				.addItem("2", 2)
 				.addItem("3", 3)
 				.addItem("4", 4)
-				.addItem("6", 6);
+				.addItem("5", 5);
 		
-		rhythmButton = cp5.addRadioButton("rhythmButton").moveTo(teacherGUI)
+		modeButton = cp5.addRadioButton("modeButton").moveTo(teacherGUI)
 				.setPosition(200, 460)
 				.setSize(40,20)
 				.setColorForeground(color(120))
@@ -143,13 +140,18 @@ public class Canon extends PApplet{
 				.setColorLabel(color(255))
 				.setItemsPerRow(3)
 				.setSpacingColumn(80)
-				.addItem("rhythm", 0)
-				.addItem("melody", 1);
+				.addItem("andante", 0)
+				.addItem("blocks", 1);
 	}
 	
 	public void draw() {
-		if (!isPaused)
-			canon_player.run(this);
+		if (!isPaused) {
+			if (figuresNotBlocks)
+				canon_player.run(this);
+			else
+				block_player.run(this);
+		}
+		score.draw();
 	}
 	
 	public void noteOnReceived(Note n) {
@@ -189,13 +191,10 @@ public class Canon extends PApplet{
 			background(0);
 			score.draw();
 		}
-		else if (key == 'm') 
-			canon_player.bPlayMetronome = !canon_player.bPlayMetronome;
-		else if (key == 'r')
-			canon_player.bRhythmOnly = !canon_player.bRhythmOnly;
 		if (isPaused) {
 			canon_player.pause(this);
 			canon_player.resetMeasures(this);
+			block_player.resetMeasures(this);
 		}
 	}
 	
@@ -239,17 +238,19 @@ public class Canon extends PApplet{
 				  return;
 			  //background(0);			  
 			  canon_player.goToMeasure(this, value);
+			  block_player.start_measure = value;
 		  }
 		  
 		  else if (e.isFrom(lengthButton)) {
 			  canon_player.setSegmentLength(this, value);
+			  block_player.measures_to_play = value -1;
 		  }
 		  
-		  else if (e.isFrom(rhythmButton)) {
+		  else if (e.isFrom(modeButton)) {
 			  if (value == 0)
-				  canon_player.bRhythmOnly = true;
+				  figuresNotBlocks = true;
 			  else
-				  canon_player.bRhythmOnly = false;
+				  figuresNotBlocks = false;
 		  }
 		  
 		  canon_player.goToMeasure(this, canon_player.segment_measure_start);

@@ -6,7 +6,7 @@ import anim.CanonStepManager;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-public class Player {
+public class CanonPlayer {
 	
 	// some voices in the Canon
 	public Voice v1;
@@ -31,12 +31,7 @@ public class Player {
 	int c_start_x = 75;
 	int init_frame_counter = 0;
 	
-	// rhythm only or melody
-	public boolean bRhythmOnly = false;
-	public boolean bPlayMetronome = false;
-	AudioPlayer audioPlayer;
-	
-	public Player(AudioPlayer a) {
+	public CanonPlayer() {
 		v1 = new Voice(0, 48);
 		v2 = new Voice(1, 55);
 		v3 = new Voice(2, 62);
@@ -49,7 +44,6 @@ public class Player {
 		
 		total_measures = v1.measures.size();
 		
-		audioPlayer = a;
 	}
 	
 
@@ -73,17 +67,13 @@ public class Player {
 		
 	}
 	
-	public void resetMeasures(Canon parent) {
-		v1.resetMeasure(global_measure);
-		
-		if (global_measure > 0)
-			v2.resetMeasure(global_measure - 1);
-		
-		if (global_measure > 1)
-			v3.resetMeasure(global_measure - 2);
-		
-		if (global_measure > 2)
-			v4.resetMeasure(global_measure - 3);
+	public void resetMeasures(Canon parent) { 			// kind of brute force but oh well... 
+		for (int i = 0; i < v1.measures.size(); i++) {
+			v1.resetMeasure(i);
+			v2.resetMeasure(i);
+			v3.resetMeasure(i);
+			v4.resetMeasure(i);
+		}
 	}
 	
 	public void restart() {
@@ -198,14 +188,6 @@ public class Player {
 			return;
 		}
 		updateFrame();
-		
-		//*** DEAL WITH RHYTHM AUDIO ***//
-		if (bPlayMetronome) {
-			if ((my_beat_rhythm != -1) && (my_beat_rhythm % 1 == 0)) {
-				audioPlayer.rewind();
-				audioPlayer.play();
-			}
-		}
 
 		//*** DEAL WITH MIDI***// 
 		// if we're not on a beat that sends midi signals things, return
@@ -227,9 +209,7 @@ public class Player {
 			
 		// if only rhythm, draw figures higher
 		int y = parent.img_y;
-		if (bRhythmOnly)
-			y-=30;
-		
+	
 		if (parent.one) {
 			parent.tint(125, 255, 255, 90);
 			v1.getCurrentStep().drawFrame(parent, v1.getAnimNote(), frame, y);
@@ -333,24 +313,12 @@ public class Player {
 			
 			// send notes
 			if (playNote) {
-				if (bRhythmOnly) { 
-					parent.output.sendNoteOn(0, v.getRhythmNote(), current_note_velocity);
-					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
-					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
-					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
-					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
-					parent.output.sendNoteOff(0, v.getRhythmNote(), 50);
-					
-				}
-				else { 
-					parent.output.sendNoteOn(0, current_note, current_note_velocity);
-					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
-					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
-					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
-					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
-					parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
-					
-				}
+				parent.output.sendNoteOn(0, current_note, current_note_velocity);
+				parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
+				parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
+				parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
+				parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
+				parent.output.sendNoteOff(0, v.getLastPlayedNote(), 50);
 			}
 			
 			
