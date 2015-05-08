@@ -5,14 +5,14 @@ import processing.core.PVector;
 public class Measure {
 	int id;
 	
-	int[] notes;	// notes in the measure
-	int[] notes_on; // valus < 0 -> not played yet; value = 0 -> playing; value > 0 -> played
-	float[] beats;  // on which beats do they occur
-	int[] velocity;
+	public int[] notes;	// notes in the measure
+	public int[] notes_on; // valus < 0 -> not played yet; value = 0 -> playing; value > 0 -> played
+	public float[] beats;  // on which beats do they occur
+	public int[] velocity;
 	
 	// for blocks
-	PVector[] block_xys;
-	int[] block_lengths;
+	public PVector[] block_xys;
+	public int[] block_lengths;
 	
 	int currentBeat = 0;
 	

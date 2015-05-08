@@ -100,7 +100,7 @@ public class BlockPlayer {
 		parent.noStroke();
 		parent.quad(98, 464, 1000, 482, 1000, 675, 1, 677);
 		parent.rect(183, 0, 711, 310);
-		
+
 		// shift the whole thing down
 		deltaY += pixels_per_frame;
 		if (last_measure == 5)

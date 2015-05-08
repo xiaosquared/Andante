@@ -64,7 +64,6 @@ public class CanonPlayer {
 		noteOff(v2, parent);
 		noteOff(v3, parent);
 		noteOff(v4, parent);
-		
 	}
 	
 	public void resetMeasures(Canon parent) { 			// kind of brute force but oh well... 
@@ -263,12 +262,14 @@ public class CanonPlayer {
 	}
 	
 	private void noteOff(Voice v, Canon parent) {
+
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
 		parent.output.sendNoteOff(0, v.getLastPlayedNote(), 30);
+		
 		parent.output.sendNoteOff(0, v.getN2(), 30);
 		parent.output.sendNoteOff(0, v.getN2(), 30);
 		parent.output.sendNoteOff(0, v.getN2(), 30);

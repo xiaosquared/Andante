@@ -7,7 +7,7 @@ import anim.*;
 
 
 public class Voice {
-	protected ArrayList<Measure> measures;
+	public ArrayList<Measure> measures;
 	int beats_per_measure = 4;
 	
 	protected int local_measure = 0;			// which measure we are on within this voice
@@ -22,6 +22,9 @@ public class Voice {
 	
 	// rhythm note
 	protected int rhythm_note;
+	
+	public int note_index = 0;
+	public int harmony = 1;
 	
 	public Voice(int measure_offset, int start_note) {
 		lastKeyFrame = new FrameProfile(start_note, start_note, start_note, 0, 0, 1);
@@ -58,6 +61,9 @@ public class Voice {
 				
 				else if ((k < m.beats.length - 1) && (m.beats[k+1] - m.beats[k] > 1))
 					length = (int) (pixels_per_beat * (m.beats[k+1] - m.beats[k]) - epsilon);
+				
+				else if (k == m.beats.length - 1)
+					length = (int) (pixels_per_beat * (5 - m.beats[k]) - epsilon);
 				
 				else if (m_next.beats[0] > 1) {				// TODO: there's a bug here...check for syncopation 
 					if ((m.beats[k] == 1) && (m.beats.length == 1))

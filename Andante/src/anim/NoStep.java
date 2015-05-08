@@ -14,6 +14,12 @@ public class NoStep extends Step {
 		sequence[0] = img;
 	}
 		
+	public NoStep(PImage img, boolean faceUp, int offset) {
+		this(img);
+		super.facingUp = faceUp;
+		super.offset = offset;
+	}
+	
 	@Override
 	public void setPreviousAction(Step prev) {
 		if (prev instanceof NoStep)
