@@ -9,6 +9,7 @@ import controlP5.ControlWindow;
 import controlP5.RadioButton;
 import canon.Canon;
 import canon.CanonPlayer;
+import canon.ScoreManager;
 import processing.core.PApplet;
 import processing.core.PImage;
 import rwmidi.MidiInput;
@@ -46,6 +47,11 @@ public class Allegro extends PApplet {
 	ControlWindow teacherGUI;
 	RadioButton voicesButton, measureButton, lengthButton, modeButton;
 	int voicesMode = 3;
+	int start_measure = 0;
+	int measures_to_play = 2;
+	
+	// S C O R E
+	AllegroScoreManager score;
 	
 	public void setup() {
 		size(1024, 535 + y_offset, P3D);
@@ -69,11 +75,14 @@ public class Allegro extends PApplet {
 		standing_still.resize(0, 85);
 		
 		setupGUI();
+		
+		score = new AllegroScoreManager(this);
+		score.draw();
 	}
 	
 	private void setupGUI() {
 		cp5 = new ControlP5(this);
-		teacherGUI = cp5.addControlWindow("TeacherGUI", 0, 0, 800, 600).setBackground(20);
+		teacherGUI = cp5.addControlWindow("TeacherGUI", 0, 0, 1440, 1050).setBackground(20);
 		voicesButton = cp5.addRadioButton("voicesButton").moveTo(teacherGUI)
 				.setPosition(200, 160)
 				.setSize(40,20)
@@ -98,12 +107,12 @@ public class Allegro extends PApplet {
 				.addItem("A2", 2)
 				.addItem("B1", 4)
 				.addItem("B2", 6)
-				.addItem("A1 & A2", 7)
-				.addItem("B1 & B2", 8)
-				.addItem("All", 9);
+				.addItem("A all", 7)
+				.addItem("B all", 8)
+				.addItem("A & B all", 9);
 		
 		modeButton = cp5.addRadioButton("modeButton").moveTo(teacherGUI)
-				.setPosition(200, 360)
+				.setPosition(1100, 800)
 				.setSize(40,20)
 				.setColorForeground(color(55))
 				.setColorActive(color(25))
@@ -124,6 +133,7 @@ public class Allegro extends PApplet {
 			else
 				block_player.run(this);
 		}
+		score.draw();
 	}
 
 	public void keyPressed() {
@@ -182,25 +192,18 @@ public class Allegro extends PApplet {
 			  if (value == -1)
 				  return;
 			  if (value < 7) {
-				  allegro_player.setSegmentLength(2);
-				  block_player.measures_to_play = 2;
-				  allegro_player.goToMeasure(value);
-				  block_player.start_measure = value;
+				  measures_to_play = 2;
+				  start_measure = value;
 			  } else if ((value == 7) || (value == 8)) {
-				  allegro_player.setSegmentLength(4);
-				  block_player.measures_to_play = 4;
+				  measures_to_play = 4;
 				  if (value == 7) {
-					  allegro_player.goToMeasure(0);
-					  block_player.start_measure = 0;
+					  start_measure = 0;
 				  } else {
-					  allegro_player.goToMeasure(4);
-					  block_player.start_measure = 4;
+					  start_measure = 4;					  
 				  }
 			  } else if (value == 9) {
-				  allegro_player.setSegmentLength(8);
-				  block_player.measures_to_play = 8;
-				  allegro_player.goToMeasure(0);
-				  block_player.start_measure = 0;
+				  measures_to_play = 8;
+				  start_measure = 0;
 			  }
 		  }
 		  else if (e.isFrom(modeButton)) {
@@ -209,9 +212,16 @@ public class Allegro extends PApplet {
 			  else
 				  figuresNotBlocks = false;
 		  }
+
 		  
-		 allegro_player.goToMeasure(allegro_player.segment_measure_start);
-		 // score.draw();
+		  block_player.measures_to_play = measures_to_play;
+		  block_player.start_measure = start_measure; 
+		  
+		  allegro_player.setSegmentLength(measures_to_play);
+		  allegro_player.segment_measure_start = start_measure;
+		  allegro_player.goToMeasure(allegro_player.segment_measure_start);
+
+		  score.draw();
 	  }
 	
 	public static void main(String[] args) {

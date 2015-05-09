@@ -27,12 +27,8 @@ public class ScoreManager {
 	}
 	
 	public void drawScorePlacement() {
-		parent.stroke(255);
-		parent.line(395, 115, 522, 115);
-		parent.line(522, 115, 525, 249);
-		parent.line(525, 249, 384, 250);
-		parent.line(384, 250, 395, 115);
-		parent.noStroke();
+		parent.fill(20);
+		parent.quad(395, 115, 522, 115, 525, 249, 384, 250);
 	}
 	
 	public void drawVoices() {

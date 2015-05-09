@@ -81,6 +81,8 @@ public class AllegroPlayer {
 	}
 	
 	private void endOfSegment(Allegro parent) {
+		parent.delay(1000);
+		
 		// reset measures
 		resetMeasures(parent);
 		
@@ -137,9 +139,9 @@ public class AllegroPlayer {
 	 */
 	private void drawStep(Allegro parent, int frame) {
 		parent.fill(0);
-		parent.rect(390, 350, 534, 475);
+		parent.rect(390, 260, 534, 475);
 		parent.fill(0);
-		parent.rect(200, 350, 190, 150);
+		parent.rect(200, 260, 200, 475);
 		
 		if (parent.voicesMode != 2) {
 

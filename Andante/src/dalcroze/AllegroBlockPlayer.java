@@ -160,11 +160,11 @@ public class AllegroBlockPlayer {
 			// coloring harmonies - super clunky :-(
 			if (color_harmonies) 
 				if ((k == 1 && (i != 7)) || (i == 0) || (k == 0 && i == 7))
-					parent.fill(255);
+					parent.fill(255, 0, 0);
 				else if ((k == 0) && ((i == 1) || (i == 4) || (i == 5) || (i == 6))) 
-					parent.fill(255, 255, 125, 200);
+					parent.fill(0, 255, 0);
 				else 
-					parent.fill(125, 255, 255, 200);
+					parent.fill(0, 0, 255);
 			else
 				parent.fill(255);
 			

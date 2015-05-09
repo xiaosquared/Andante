@@ -123,7 +123,7 @@ public class Canon extends PApplet{
 				.addItem("Whole Piece: A + B", 2);
 		
 		modeButton = cp5.addRadioButton("modeButton").moveTo(teacherGUI)
-				.setPosition(200, 360)
+				.setPosition(1100, 800)
 				.setSize(40,20)
 				.setColorForeground(color(55))
 				.setColorActive(color(25))
