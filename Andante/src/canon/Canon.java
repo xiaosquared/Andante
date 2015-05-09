@@ -8,6 +8,7 @@ import controlP5.*;
 import processing.opengl.PGraphicsOpenGL;
 import anim.CanonStepManager;
 import processing.core.PApplet;
+import processing.core.PFont;
 import processing.core.PImage;
 import rwmidi.MidiInput;
 import rwmidi.MidiOutput;
@@ -39,8 +40,7 @@ public class Canon extends PApplet{
 	boolean three = false;
 	boolean four = false;
 	
-	int canonMode = 3;	// when two voices are on
-	
+
 	boolean trails = true;
 
 	// BLOCK MODE
@@ -55,6 +55,10 @@ public class Canon extends PApplet{
 	ControlP5 cp5;
 	ControlWindow teacherGUI;
 	RadioButton voicesButton, measureButton, lengthButton, modeButton;
+
+	int canonMode = 3;	// when two voices are on
+	int startMeasure = 0;
+	int measures_to_play = 5;
 	
 	//score
 	ScoreManager score;
@@ -91,8 +95,9 @@ public class Canon extends PApplet{
 	}
 	
 	private void setupGUI() {
+		
 		cp5 = new ControlP5(this);
-		teacherGUI = cp5.addControlWindow("TeacherGUI", 0, 0, 800, 600).setBackground(20);
+		teacherGUI = cp5.addControlWindow("TeacherGUI", 0, 0, 1440, 1050).setBackground(20);
 		voicesButton = cp5.addRadioButton("voicesButton").moveTo(teacherGUI)
 				.setPosition(200, 160)
 				.setSize(40,20)
@@ -101,9 +106,9 @@ public class Canon extends PApplet{
 				.setColorLabel(color(255))
 				.setItemsPerRow(3)
 				.setSpacingColumn(80)
-				.addItem("low voice", 1)
-				.addItem("high voice", 2)
-				.addItem("both voices", 3);
+				.addItem("LEFT HAND", 1)
+				.addItem("RIGHT HAND", 2)
+				.addItem("BOTH HANDS", 3);
 		
 		measureButton = cp5.addRadioButton("measureButton").moveTo(teacherGUI)
 				.setPosition(200, 260)
@@ -113,31 +118,16 @@ public class Canon extends PApplet{
 				.setColorLabel(color(255))
 				.setItemsPerRow(5)
 				.setSpacingColumn(80)
-				.addItem("m1", 0)
-				.addItem("m2", 1)
-				.addItem("m3", 2)
-				.addItem("m4", 3)
-				.addItem("m5", 4);
-		
-		lengthButton = cp5.addRadioButton("lengthButton").moveTo(teacherGUI)
-				.setPosition(200, 360)
-				.setSize(40,20)
-				.setColorForeground(color(120))
-				.setColorActive(color(255))
-				.setColorLabel(color(255))
-				.setItemsPerRow(4)
-				.setSpacingColumn(80)
-				.addItem("2", 2)
-				.addItem("3", 3)
-				.addItem("4", 4)
-				.addItem("5", 5);
+				.addItem("PART A", 0)
+				.addItem("PART B", 1)
+				.addItem("Whole Piece: A + B", 2);
 		
 		modeButton = cp5.addRadioButton("modeButton").moveTo(teacherGUI)
-				.setPosition(200, 460)
+				.setPosition(200, 360)
 				.setSize(40,20)
-				.setColorForeground(color(120))
-				.setColorActive(color(255))
-				.setColorLabel(color(255))
+				.setColorForeground(color(55))
+				.setColorActive(color(25))
+				.setColorLabel(color(55))
 				.setItemsPerRow(3)
 				.setSpacingColumn(80)
 				.addItem("andante", 0)
@@ -210,40 +200,37 @@ public class Canon extends PApplet{
 		  
 		  int value = (int) e.getGroup().getValue();
 		  
-		  if (e.isFrom(voicesButton)) {						// set which voice is on
-			switch(value) {
-				case 1:
-					one = true;
-					two = false;
-					canonMode = 1;
-					println("one");
-					break;
-				case 2:
-					one = false;
-					two = true;
-					canonMode = 2;
-					println("two");
-					break;
-				case 3:
-					one = true;
-					two = true;
-					canonMode = 3;
-					println("three");
-					break;
-			}
-		  }
-		  
-		  else if (e.isFrom(measureButton)) {
+		  if (e.isFrom(measureButton)) {
 			  if (value == -1)
 				  return;
-			  //background(0);			  
-			  canon_player.goToMeasure(this, value);
-			  block_player.start_measure = value;
+			  if (value == 0) {
+				  startMeasure = 0;
+				  measures_to_play = 2;
+			  } else if (value == 1) {
+				  startMeasure = 2;
+				  measures_to_play = 2;
+			  } else if (value == 2) {
+				  startMeasure = 0;
+				  measures_to_play = 4;
+			  }
 		  }
 		  
-		  else if (e.isFrom(lengthButton)) {
-			  canon_player.setSegmentLength(this, value);
-			  block_player.measures_to_play = value -1;
+		  if (e.isFrom(voicesButton)) {						// set which voice is on
+				switch(value) {
+					case 1:
+						one = true;
+						two = false;
+						canonMode = 1;
+						break;
+					case 2:
+						one = false;
+						two = true;
+						canonMode = 2;
+						break;
+					case 3:
+						canonMode = 3;
+						break;
+				}
 		  }
 		  
 		  else if (e.isFrom(modeButton)) {
@@ -253,6 +240,15 @@ public class Canon extends PApplet{
 				  figuresNotBlocks = false;
 		  }
 		  
+		  if (canonMode == 3) {
+			  one = true;
+			  two = true;
+		  }
+		  
+		  block_player.start_measure = startMeasure;
+		  block_player.measures_to_play = measures_to_play;
+		  canon_player.segment_measure_start = startMeasure;
+		  canon_player.setSegmentLength(this, measures_to_play);
 		  canon_player.goToMeasure(this, canon_player.segment_measure_start);
 		  score.draw();
 	  }

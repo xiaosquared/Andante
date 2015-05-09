@@ -20,7 +20,7 @@ public class AllegroPlayer {
 	
 	// playing a small segment. Length is how many measures.
 	int segment_measure_start = 0;
-	int segment_measure_length = 2;
+	int segment_measure_length = 8;
 	int frames_in_segment = -1;
 	int segment_frame_counter = 0;
 	//***********************************************************
@@ -50,8 +50,6 @@ public class AllegroPlayer {
 		LH1.note_index = 0;
 		LH2.note_index = 0;
 		LH3.note_index = 0;
-		resetMeasures(parent);
-		restart();
 	}
 	
 	public void resetMeasures(Allegro parent) { 			// kind of brute force but oh well... 
@@ -66,7 +64,6 @@ public class AllegroPlayer {
 	public void restart() {
 		frame_counter = 0;
 		global_measure = 0;
-		
 	}
 	
 	public void goToMeasure(int measure) {
@@ -175,10 +172,18 @@ public class AllegroPlayer {
 	 */
 	private void playMidiVoices(Allegro parent, float my_beat) {
 		int looping_global_measure = global_measure % total_measures;
-		playVoice(RH, my_beat, looping_global_measure, parent, true);
-		playVoice(LH1, my_beat, looping_global_measure, parent, true);
-		playVoice(LH2, my_beat, looping_global_measure, parent, true);
-		playVoice(LH3, my_beat, looping_global_measure, parent, true);
+		
+		if (parent.voicesMode != 1) {
+			playVoice(LH1, my_beat, looping_global_measure, parent, true);
+			playVoice(LH2, my_beat, looping_global_measure, parent, true);
+			playVoice(LH3, my_beat, looping_global_measure, parent, true);
+			if (parent.voicesMode == 3)
+				playVoice(RH, my_beat, looping_global_measure, parent, true);
+		} else if (parent.voicesMode == 1) {
+			playVoice(RH, my_beat, looping_global_measure, parent, true);
+		}
+		
+		
 	}
 	
 	private void playVoice(Voice v, float my_beat, int global_measure_looped, Allegro parent, boolean playNote) {

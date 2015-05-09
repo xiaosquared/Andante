@@ -16,7 +16,7 @@ public class BlockPlayer {
 	int global_measure = 0;
 	int total_measures;
 	int start_measure = 0;
-	int measures_to_play = 6;
+	int measures_to_play = 4;
 	
 	// drawing!
 	int startY = 454;		// TODO: currently super arbitrary. figure out what it is on the piano
@@ -36,7 +36,8 @@ public class BlockPlayer {
 	
 	// playing notes
 	int send_note_line = 455;
-	int last_note_played = 0;
+	int last_note_LH = 0;
+	int last_note_RH = 0;
 	
 	public BlockPlayer() {
 		v1 = new Voice(0, 48);
@@ -65,21 +66,28 @@ public class BlockPlayer {
 			Measure m_v1 = v1.measures.get(i);
 			Measure m_v2 = v2.measures.get(i);
 			
+			int n = 0;
 			if (parent.canonMode !=2) {
 				parent.fill(125, 255, 255, 200);
-				drawBlockPlayMusic(parent, i, m_v1, 0, start_measure_offset, false);
+				n = drawBlockPlayMusic(parent, i, m_v1, 0, start_measure_offset, false);
+				if (n != 0)
+					last_note_RH = n;
+					
 				if (parent.canonMode == 3) {
 					parent.fill(255, 255, 125, 200);
-					drawBlockPlayMusic(parent, i, m_v2, 1, start_measure_offset, false);
+					n = drawBlockPlayMusic(parent, i, m_v2, 1, start_measure_offset, false);
+					if (n != 0)
+						last_note_LH = n;
 				}
 			} else { 
 				parent.fill(255, 255, 125, 200);
-				drawBlockPlayMusic(parent, i, m_v2, 0, start_measure_offset, false);
+				n = drawBlockPlayMusic(parent, i, m_v2, 0, start_measure_offset, false);
+				if (n != 0)
+					last_note_LH = n;
+				
 			}
 		}
-		
 		// The first note of the last measure
-		
 		Measure m_v1 = v1.measures.get(last_measure);
 		Measure m_v2 = v2.measures.get(last_measure);
 		if (parent.canonMode != 2) {
@@ -103,19 +111,34 @@ public class BlockPlayer {
 
 		// shift the whole thing down
 		deltaY += pixels_per_frame;
-		if (last_measure == 5)
-			deltaY %= beats_per_measure * pixels_per_beat * (last_measure - start_measure + 2.4 + parent.canonMode/3);
+		if (last_measure == 4)
+			deltaY %= beats_per_measure * pixels_per_beat * (last_measure - start_measure + 1.8 + parent.canonMode/3);
 		else
 			deltaY %= beats_per_measure * pixels_per_beat * (last_measure - start_measure + 1 + parent.canonMode/3);
 	}
 	
 	public void resetMeasures(Canon parent) {
 		deltaY = 0;
-		parent.output.sendNoteOff(0, last_note_played, 40);
-		parent.output.sendNoteOff(0, last_note_played, 40);
-		parent.output.sendNoteOff(0, last_note_played, 40);
-		parent.output.sendNoteOff(0, last_note_played, 40);
-		parent.output.sendNoteOff(0, last_note_played, 40);
+		parent.output.sendNoteOff(0, last_note_RH, 40);
+		parent.output.sendNoteOff(0, last_note_RH, 40);
+		parent.output.sendNoteOff(0, last_note_RH, 40);
+		parent.output.sendNoteOff(0, last_note_RH, 40);
+		parent.output.sendNoteOff(0, last_note_RH, 40);
+		
+		parent.output.sendNoteOff(0, last_note_LH, 40);
+		parent.output.sendNoteOff(0, last_note_LH, 40);
+		parent.output.sendNoteOff(0, last_note_LH, 40);
+		parent.output.sendNoteOff(0, last_note_LH, 40);
+		parent.output.sendNoteOff(0, last_note_LH, 40);
+		
+		for (int i = start_measure; i < start_measure + measures_to_play; i++) {
+			Measure m1 = v1.measures.get(i);
+			Measure m2 = v2.measures.get(i);
+			for (int k = 0; k < m1.beats.length; k++)
+				m1.notes_on[k] = -1;
+			for (int k = 0; k < m2.beats.length; k++)
+				m2.notes_on[k] = -1;
+		}
 	}
 	
 	/**
@@ -126,7 +149,9 @@ public class BlockPlayer {
 	 * @param voice_offset - to offset the different voices of this canon
 	 * @param loop_offset - to offset the whole thing: for looping
 	 */
-	private void drawBlockPlayMusic(Canon parent, int i, Measure m, int voice_offset, int loop_offset, boolean just_the_tip) {
+	private int drawBlockPlayMusic(Canon parent, int i, Measure m, int voice_offset, int loop_offset, boolean just_the_tip) {
+		int lastNotePlayed = 0;
+		
 		int k_length = m.beats.length;
 		if (just_the_tip)
 			k_length = 1;
@@ -139,7 +164,7 @@ public class BlockPlayer {
 					&& (block_y + m.block_lengths[k] < send_note_line + pixels_per_frame * 2)
 					&& m.notes_on[k] < 0) {
 				parent.output.sendNoteOn(0, m.notes[k], m.velocity[k]);
-				int lastNotePlayed = m.notes[k];
+				lastNotePlayed = m.notes[k];
 				m.notes_on[k] = 0;
 			} else if ((block_y > send_note_line) && m.notes_on[k] == 0) {
 				parent.output.sendNoteOff(0, m.notes[k], 40);
@@ -151,5 +176,7 @@ public class BlockPlayer {
 				m.notes_on[k] = -1;
 			}
 		}
+		return lastNotePlayed;
+		
 	}
 }

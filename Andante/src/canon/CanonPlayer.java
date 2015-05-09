@@ -23,7 +23,7 @@ public class CanonPlayer {
 	
 	// playing a small segment. Length is how many measures.
 	int segment_measure_start = 0;
-	int segment_measure_length = 2;
+	int segment_measure_length = 4;
 	int frames_in_segment = -1;
 	int segment_frame_counter = 0;
 	
@@ -125,6 +125,9 @@ public class CanonPlayer {
 	
 	//TODO
 	private void endOfSegment(Canon parent) {
+		if (global_measure >= 4)
+			parent.delay(1000);
+		
 		// reset measures
 		v1.resetMeasure(global_measure);
 		v2.resetMeasure(global_measure - 1);
@@ -133,10 +136,13 @@ public class CanonPlayer {
 		noteOff(v1, parent);
 		noteOff(v2, parent);
 		
+		if (global_measure < 4)
+			parent.delay(1000);
+		
 		if (parent.canonMode == 2)
 			goToMeasure(parent, global_measure - segment_measure_length - 1);
 		else
-			goToMeasure(parent, global_measure - segment_measure_length);
+			goToMeasure(parent, parent.startMeasure);
 	}
 	
 	private int framesInSegment(Canon parent) {

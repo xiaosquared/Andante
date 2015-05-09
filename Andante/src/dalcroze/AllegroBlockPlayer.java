@@ -103,12 +103,13 @@ public class AllegroBlockPlayer {
 
 		// shift the whole thing down
 		deltaY += pixels_per_frame;
-		deltaY %= beats_per_measure * pixels_per_beat * (parent.min(last_measure, total_measures) - start_measure + .6);
+		deltaY %= beats_per_measure * pixels_per_beat * (parent.min(last_measure, total_measures) - start_measure + .4);
 		frame++;
 		frame %= total_frames;
 	}
 	
 	public void resetMeasures(Allegro parent) {
+		deltaY = 0;
 		parent.output.sendNoteOff(0, last_note_RH, 40);
 		parent.output.sendNoteOff(0, last_note_RH, 40);
 		parent.output.sendNoteOff(0, last_note_RH, 40);
@@ -128,6 +129,21 @@ public class AllegroBlockPlayer {
 		parent.output.sendNoteOff(0, last_note_LH3, 40);
 		parent.output.sendNoteOff(0, last_note_LH3, 40);
 		parent.output.sendNoteOff(0, last_note_LH3, 40);
+		
+		for (int i = start_measure; i < start_measure + measures_to_play; i++) {
+			Measure m_rh = RH.measures.get(i);
+			Measure m_lh1 = LH1.measures.get(i);
+			Measure m_lh2 = LH2.measures.get(i);
+			Measure m_lh3 = LH3.measures.get(i);
+			for (int k = 0; k < m_rh.beats.length; k++)
+				m_rh.notes_on[k] = -1;
+			for (int k = 0; k < m_lh1.beats.length; k++)
+				m_lh1.notes_on[k] = -1;
+			for (int k = 0; k < m_lh2.beats.length; k++)
+				m_lh2.notes_on[k] = -1;
+			for (int k = 0; k < m_lh3.beats.length; k++)
+				m_lh3.notes_on[k] = -1;
+		}
 	}
 	
 	/**

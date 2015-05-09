@@ -82,42 +82,32 @@ public class Allegro extends PApplet {
 				.setColorLabel(color(255))
 				.setItemsPerRow(3)
 				.setSpacingColumn(80)
-				.addItem("RH", 1)
-				.addItem("LH", 2)
+				.addItem("RIGHT HAND", 1)
+				.addItem("LEFT HAND", 2)
 				.addItem("Both", 3);
 		
 		measureButton = cp5.addRadioButton("measureButton").moveTo(teacherGUI)
-				.setPosition(200, 260)
-				.setSize(40,20)
-				.setColorForeground(color(120))
-				.setColorActive(color(255))
-				.setColorLabel(color(255))
-				.setItemsPerRow(5)
-				.setSpacingColumn(80)
-				.addItem("m1", 0)
-				.addItem("m2", 2)
-				.addItem("m3", 4)
-				.addItem("m4", 6);
-		
-		lengthButton = cp5.addRadioButton("lengthButton").moveTo(teacherGUI)
-				.setPosition(200, 360)
+				.setPosition(200, 240)
 				.setSize(40,20)
 				.setColorForeground(color(120))
 				.setColorActive(color(255))
 				.setColorLabel(color(255))
 				.setItemsPerRow(4)
 				.setSpacingColumn(80)
-				.addItem("2", 2)
-				.addItem("3", 4)
-				.addItem("4", 8)
-				.addItem("5", 12);
+				.addItem("A1", 0)
+				.addItem("A2", 2)
+				.addItem("B1", 4)
+				.addItem("B2", 6)
+				.addItem("A1 & A2", 7)
+				.addItem("B1 & B2", 8)
+				.addItem("All", 9);
 		
 		modeButton = cp5.addRadioButton("modeButton").moveTo(teacherGUI)
-				.setPosition(200, 460)
+				.setPosition(200, 360)
 				.setSize(40,20)
-				.setColorForeground(color(120))
-				.setColorActive(color(255))
-				.setColorLabel(color(255))
+				.setColorForeground(color(55))
+				.setColorActive(color(25))
+				.setColorLabel(color(55))
 				.setItemsPerRow(3)
 				.setSpacingColumn(80)
 				.addItem("andante", 0)
@@ -137,9 +127,12 @@ public class Allegro extends PApplet {
 	}
 
 	public void keyPressed() {
-		if (keyCode == 32)
+		if (keyCode == 32) {
 			isPaused = !isPaused;
-		
+			allegro_player.goToMeasure(allegro_player.segment_measure_start);
+
+		}
+			
 		if (isPaused) {
 			allegro_player.pause(this);
 			allegro_player.resetMeasures(this);
@@ -188,16 +181,28 @@ public class Allegro extends PApplet {
 		  else if (e.isFrom(measureButton)) {
 			  if (value == -1)
 				  return;
-			  //background(0);			  
-			  allegro_player.goToMeasure(value);
-			  block_player.start_measure = value;
+			  if (value < 7) {
+				  allegro_player.setSegmentLength(2);
+				  block_player.measures_to_play = 2;
+				  allegro_player.goToMeasure(value);
+				  block_player.start_measure = value;
+			  } else if ((value == 7) || (value == 8)) {
+				  allegro_player.setSegmentLength(4);
+				  block_player.measures_to_play = 4;
+				  if (value == 7) {
+					  allegro_player.goToMeasure(0);
+					  block_player.start_measure = 0;
+				  } else {
+					  allegro_player.goToMeasure(4);
+					  block_player.start_measure = 4;
+				  }
+			  } else if (value == 9) {
+				  allegro_player.setSegmentLength(8);
+				  block_player.measures_to_play = 8;
+				  allegro_player.goToMeasure(0);
+				  block_player.start_measure = 0;
+			  }
 		  }
-		  
-		  else if (e.isFrom(lengthButton)) {
-			  allegro_player.setSegmentLength(value);
-			  block_player.measures_to_play = value -1;
-		  }
-		  
 		  else if (e.isFrom(modeButton)) {
 			  if (value == 0)
 				  figuresNotBlocks = true;
